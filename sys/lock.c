@@ -38,7 +38,8 @@ SYSCALL lock(int ldesc1, int type, int priority)
 		if(locktab[ldesc1].ltype == READ && type == READ)
 		{
 			int nextproc = lq[locktab[ldesc1].lqhead].lqnext;
-			if(lq[nextproc].lqkey <= priority)
+			kprintf("The highest wait priority is %d with head at %d\n",lq[nextproc].lqkey, locktab[ldesc1].lqhead);
+			if(lq[nextproc].lqkey < priority)
 			{
 				acqlock(currpid,ldesc1,type);
 				restore(ps);
@@ -66,7 +67,9 @@ int acqlock(int pid, int lock, int type)
 	lptr->ltype = type;
 
 	pptr->lhead = addlist(lock, pptr->lhead);
+	kprintf("lptr->lhead in acqlock is  %d\n", lptr->lhead);
 	lptr->lhead = addlist(pid, lptr->lhead);
+	kprintf("lptr->lhead item in acqlock is  %d\n", lptr->lhead->item);
 
 	if(ppriority(pid) < lptr->lprio)
 		pptr->pinh = lptr->lprio;
@@ -80,8 +83,8 @@ int acqlock(int pid, int lock, int type)
 llist* addlist(int item, llist* lhead)
 {
 	llist *plock = (llist *)getmem(sizeof(llist));
-	plock->lnext = lhead != NULL ? lhead->lnext :NULL;
-	plock->item = lock;
+	plock->item = item;
+	plock->lnext = lhead;
 	return plock;
 }
 
@@ -89,9 +92,10 @@ llist* addlist(int item, llist* lhead)
  * removelist  --  Remove item from llist
  *------------------------------------------------------------------------
  */
-llist* removelist(int item, llist* lhead)
+llist* removelist( llist* lhead,int item)
 {
 	llist * p = lhead;
+
 	if(p->item == item)
 	{
 		return p->lnext;
@@ -244,10 +248,23 @@ void updatepinh(llist* lhead, int priority)
 	llist *list = lhead;
 	while(list != NULL)
 	{
-		int pprio = ppriority(list->item);
+		//int pprio = ppriority(list->item);
+		int pprio = proctab[list->item].pprio;
 		if(priority > pprio)
 		{
-			proctab[list->item].pinh = priority;
+			struct pentry *pptr = &proctab[list->item];
+			pptr->pinh = priority;
+			if(pptr->lockid != -1)
+			{
+				pptr->lockid = -1;
+				ldequeue(list->item);
+				struct lentry *lptr;
+				lptr = &locktab[pptr->lockid];
+				if(lptr->lprio <= ppriority(list->item)){
+					lptr->lprio = updatelprio(lptr->lhead);
+					updatepinh(lptr->lhead,lptr->lprio);
+				}
+			}
  		}
 		list = list->lnext;
 	}

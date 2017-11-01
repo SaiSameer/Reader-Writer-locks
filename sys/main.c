@@ -4,6 +4,7 @@
 #include <lock.h>
 #include <stdio.h>
 #include <lock.h>
+#include <lq.h>
 
 #define DEFAULT_LOCK_PRIO 20
 
@@ -113,7 +114,6 @@ void test2 ()
 		resume (rd3);
 		resume (rd4);
 
-
         sleep (15);
         kprintf("output=%s\n", output2);
         assert(mystrncmp(output2,"ABABDDCCEE",10)==0,"Test 2 FAILED\n");
@@ -163,6 +163,7 @@ void test3 ()
         kprintf("-start reader A, then sleep 1s. reader A(prio 25) blocked on the lock\n");
         resume(rd1);
         sleep (1);
+        kprintf("get prio(wr1) %d\n",getprio(wr1));
 	assert (getprio(wr1) == 25, "Test 3 failed");
 
         kprintf("-start reader B, then sleep 1s. reader B(prio 30) blocked on the lock\n");
@@ -173,11 +174,13 @@ void test3 ()
 	kprintf("-kill reader B, then sleep 1s\n");
 	kill (rd2);
 	sleep (1);
+	kprintf("get prio(wr1) %d\n",getprio(wr1));
 	assert (getprio(wr1) == 25, "Test 3 failed");
 
 	kprintf("-kill reader A, then sleep 1s\n");
 	kill (rd1);
 	sleep(1);
+	kprintf("get prio(wr1) %d\n",getprio(wr1));
 	assert(getprio(wr1) == 20, "Test 3 failed");
 
         sleep (8);

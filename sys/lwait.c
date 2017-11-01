@@ -30,6 +30,7 @@ SYSCALL	lwait(int lock, int type, int priority)
 	if(lptr->lprio < pprio){
 		lptr->lprio = pprio;
 		llist * list = lptr->lhead;
+		kprintf("lptr->head item is %d\n", lptr->lhead->item);
 		while(list != NULL)
 		{
 			int lprio = ppriority(list->item);

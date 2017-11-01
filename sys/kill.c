@@ -59,6 +59,7 @@ SYSCALL kill(int pid)
 	default:	pptr->pstate = PRFREE;
 	}
 
+	kprintf("THe proces being killed is %d",pid);
 	removeprocess(pptr->lhead,pid);
 	if(pptr->lockid != -1)
 	{
