@@ -16,7 +16,7 @@
 #define	LUSED	'\02'		/* this lock is used		*/
 #define READ	0			/* Acquired by a reader*/
 #define WRITE	1			/* Acquired by a writer*/
-#define DELETE	2			/* Deleted*/
+#define DELETED	2			/* Deleted*/
 
 struct	lentry	{		/* Lock table entry		*/
 	char	lstate;		/* the state LFREE or LUSED		*/

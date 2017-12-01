@@ -29,7 +29,8 @@ int lenqueue(int item, int type, int priority, int head)
 			break;
 		}
 	}
-	mptr->lqprev = lq[hptr->lqnext].lqprev;
+	//mptr->lqprev = lq[hptr->lqnext].lqprev;
+	mptr->lqprev = hptr->lqkey;
 	mptr->lqnext = hptr->lqnext;
 	lq[hptr->lqnext].lqprev = item;
 	hptr->lqnext = item;

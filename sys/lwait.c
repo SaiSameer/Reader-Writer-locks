@@ -3,7 +3,7 @@
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
-#include <q.h>
+#include <lq.h>
 #include <lock.h>
 #include <stdio.h>
 
@@ -25,7 +25,8 @@ SYSCALL	lwait(int lock, int type, int priority)
 
 	(pptr = &proctab[currpid])->pstate = PRWAIT;
 	pptr->lockid = lock;
-	lenqueue(currpid,type,priority,lptr->lqhead); // TODO define lenqueue
+	lenqueue(currpid,type,priority,lptr->lqhead);
+	lptr->lprio = lptr->lprio < pptr->pprio ? pptr->pprio : lptr->lprio;
 	pptr->pwaitret = OK;
 	resched();
 	restore(ps);
