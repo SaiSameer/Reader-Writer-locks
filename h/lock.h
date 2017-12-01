@@ -24,6 +24,7 @@ struct	lentry	{		/* Lock table entry		*/
 	int	lckcnt;		/* count for this lock		*/
 	int	lqhead;		/* q index of head of list		*/
 	int	lqtail;		/* q index of tail of list		*/
+	plist * phead;	// TODO define plist
 	int lprio;
 };
 extern	struct	lentry	locktab[];
