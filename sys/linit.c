@@ -16,6 +16,6 @@ void linit()
 	for (i=0 ; i<NLOCKS ; i++) {	/* initialize locks */
 		(lptr = &locktab[i])->lstate = LFREE;
 		lptr->lprio = MININT;
-		lptr->lqtail = 1 + (lptr->lqhead = newqueue());
+		lptr->lqtail = 1 + (lptr->lqhead = newlqueue());
 	}
 }

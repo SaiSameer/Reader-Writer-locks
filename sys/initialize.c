@@ -37,6 +37,8 @@ int	nextsem;		/* next sempahore slot to use in screate*/
 int nextlock;
 struct	qent	q[NQENT];	/* q table (see queue.c)		*/
 int	nextqueue;		/* next slot in q structure to use	*/
+int nextlqueue;
+int nextlist;
 char	*maxaddr;		/* max memory address (set by sizmem)	*/
 struct	mblock	memlist;	/* list of free memory blocks		*/
 #ifdef	Ntty
@@ -137,6 +139,8 @@ LOCAL int sysinit()
 	nextsem = NSEM-1;
 	nextlock = NLOCKS-1;
 	nextqueue = NPROC;		/* q[0..NPROC-1] are processes */
+	nextlist = NPROC-1;
+	nextlqueue = NPROC;
 
 	/* initialize free memory list */
 	/* PC version has to pre-allocate 640K-1024K "hole" */
@@ -180,6 +184,8 @@ LOCAL int sysinit()
 		(sptr = &semaph[i])->sstate = SFREE;
 		sptr->sqtail = 1 + (sptr->sqhead = newqueue());
 	}
+
+	linit();
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
 
