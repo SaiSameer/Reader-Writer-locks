@@ -24,12 +24,19 @@ struct	lentry	{		/* Lock table entry		*/
 	int	lckcnt;		/* count for this lock		*/
 	int	lqhead;		/* q index of head of list		*/
 	int	lqtail;		/* q index of tail of list		*/
-	plist * phead;	// TODO define plist
+	llist * lhead;	// TODO define plist
 	int lprio;
 };
+
+typedef struct llist {
+	struct llist *lnext;
+	int item;
+}llist;
 extern	struct	lentry	locktab[];
 extern	int	nextlock;
 
 #define	isbadlock(l)	(l<0 || l>=NLOCKS)
+
+llist* addlist(int item, llist* lhead);
 
 #endif /* LOCK_H_ */

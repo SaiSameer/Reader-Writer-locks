@@ -23,8 +23,6 @@ SYSCALL lcreate()
 		restore(ps);
 		return(SYSERR);
 	}
-	//locktab[lock].lprio = MININT;
-	/* lqhead and lqtail were initialized at system startup */
 	restore(ps);
 	return(lock);
 }

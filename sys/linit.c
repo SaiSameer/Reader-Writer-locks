@@ -2,7 +2,7 @@
 
 #include <conf.h>
 #include <kernel.h>
-#include <q.h>
+#include <lq.h>
 #include <lock.h>
 
 /*------------------------------------------------------------------------
@@ -16,6 +16,7 @@ void linit()
 	for (i=0 ; i<NLOCKS ; i++) {	/* initialize locks */
 		(lptr = &locktab[i])->lstate = LFREE;
 		lptr->lprio = MININT;
+		lptr->lhead = NULL;
 		lptr->lqtail = 1 + (lptr->lqhead = newlqueue());
 	}
 }

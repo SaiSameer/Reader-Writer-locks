@@ -62,7 +62,7 @@ struct	pentry	{
 	int	pwaitret;
 	int pinh;
 	int lockid;
-	llist * locks; // TODO create llist
+	llist * lhead; // TODO create llist
 };
 
 

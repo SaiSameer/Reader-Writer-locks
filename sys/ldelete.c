@@ -3,7 +3,7 @@
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
-#include <q.h>
+#include <lq.h>
 #include <lock.h>
 #include <stdio.h>
 
@@ -24,8 +24,8 @@ SYSCALL ldelete(int lock)
 	}
 	lptr = &locktab[lock];
 	lptr->lstate = LFREE;
-	if (nonempty(lptr->lqhead)) {
-		while( (pid=getfirst(lptr->lqhead)) != EMPTY)
+	if (nonemptylq(lptr->lqhead)) {
+		while( (pid=getfirstl(lptr->lqhead)) != EMPTY)
 		  {
 		    proctab[pid].pwaitret = DELETED;
 		    ready(pid,RESCHNO);

@@ -20,8 +20,6 @@ SYSCALL lock(int ldesc1, int type, int priority)
 
 	disable(ps);
 	int	i;
-	struct lentry *lptr;
-	struct pentry *pptr;
 	if(locktab[ldesc1].lstate == LFREE)
 	{
 		acqlock(ldesc1, type);
@@ -49,12 +47,30 @@ SYSCALL lock(int ldesc1, int type, int priority)
  * acqlock  --  Acquire lock
  *------------------------------------------------------------------------
  */
-LOCAL int acqlock(int ldesc1, int type)
+LOCAL int acqlock(int lock, int type)
 {
-	struct lentry *lptr = &locktab[ldesc1];
+	struct lentry *lptr;
+	struct pentry *pptr;
+	lptr = &locktab[lock];
+	pptr = &proctab[currpid];
+
 	lptr->lstate = LUSED;
 	lptr->ltype = type;
-	//priority = lptr->lprio > priority ? lptr->lprio : priority;
-	addlist(currpid,lptr->phead);
-	pptr->pinh = (pptr=&proctab[currpid])->pprio > lptr->lprio ? 0 : lptr->lprio; //TODO
+
+	pptr->lhead = addlist(lock, pptr->lhead);
+	lptr->lhead = addlist(currpid, lptr->lhead);
+
+	pptr->pinh = pptr->pprio > lptr->lprio ? 0 : lptr->lprio;
+}
+
+/*------------------------------------------------------------------------
+ * addlist  --  Add to llist
+ *------------------------------------------------------------------------
+ */
+llist* addlist(int item, llist* lhead)
+{
+	llist *plock = (llist *)getmem(sizeof(llist));
+	plock->lnext = lhead != NULL ? lhead->lnext :NULL;
+	plock->item = lock;
+	return plock;
 }
