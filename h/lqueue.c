@@ -44,7 +44,7 @@ int lenqueue(int item, int type, int priority, int head)
  */
 int ldequeue(int item)
 {
-	struct	lqent	*mptr;		/* pointer to q entry for item	*/
+	struct	lqent	*mptr;		/* pointer to lq entry for item	*/
 
 	mptr = &lq[item];
 	lq[mptr->lqprev].lqnext = mptr->lqnext;

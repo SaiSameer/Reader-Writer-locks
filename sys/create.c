@@ -68,6 +68,7 @@ SYSCALL create(procaddr,ssize,priority,name,nargs,args)
 	pptr->pdevs[0] = pptr->pdevs[1] = pptr->ppagedev = BADDEV;
 	pptr->pinh =0;
 	pptr->lhead = NULL;
+	pptr->dlhead = NULL;
 	pptr->lockid = EMPTY;
 
 		/* Bottom of stack */

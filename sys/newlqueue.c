@@ -19,8 +19,10 @@ int newlqueue()
 	hptr->lqnext = tindex;
 	hptr->lqprev = EMPTY;
 	hptr->lqkey  = MAXINT;
+	hptr->lqtype = -1;
 	tptr->lqnext = EMPTY;
 	tptr->lqprev = hindex;
 	tptr->lqkey  = MININT;
+	hptr->lqtype = -1;
 	return(hindex);
 }

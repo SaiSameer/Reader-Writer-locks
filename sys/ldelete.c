@@ -28,6 +28,7 @@ SYSCALL ldelete(int lock)
 		while( (pid=getfirstl(lptr->lqhead)) != EMPTY)
 		  {
 		    proctab[pid].pwaitret = DELETED;
+		    proctab[pid].dlhead = addlist(lock, proctab[pid].dlhead);
 		    ready(pid,RESCHNO);
 		  }
 		resched();

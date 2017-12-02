@@ -22,9 +22,9 @@ struct	lentry	{		/* Lock table entry		*/
 	char	lstate;		/* the state LFREE or LUSED		*/
 	int	ltype;		/* the type READ or WRITE or DELETED*/
 	int	lckcnt;		/* count for this lock		*/
-	int	lqhead;		/* q index of head of list		*/
-	int	lqtail;		/* q index of tail of list		*/
-	llist * lhead;	// TODO define plist
+	int	lqhead;		/* lq index of head of list		*/
+	int	lqtail;		/* lq index of tail of list		*/
+	llist * lhead;
 	int lprio;
 };
 
@@ -37,6 +37,8 @@ extern	int	nextlock;
 
 #define	isbadlock(l)	(l<0 || l>=NLOCKS)
 
+int acqlock(int pid, int lock, int type);
 llist* addlist(int item, llist* lhead);
+int ppriority(int pid);
 
 #endif /* LOCK_H_ */

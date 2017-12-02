@@ -25,8 +25,21 @@ SYSCALL	lwait(int lock, int type, int priority)
 
 	(pptr = &proctab[currpid])->pstate = PRWAIT;
 	pptr->lockid = lock;
+	int pprio = ppriority(currpid);
 	lenqueue(currpid,type,priority,lptr->lqhead);
-	lptr->lprio = lptr->lprio < pptr->pprio ? pptr->pprio : lptr->lprio;
+	if(lptr->lprio < pprio){
+		lptr->lprio = pprio;
+		llist * list = lptr->lhead;
+		while(list != NULL)
+		{
+			int lprio = ppriority(list->item);
+			if(lprio < lptr->lprio)
+			{
+				proctab[list->item].pinh = lptr->lprio;
+			}
+			list= list->lnext;
+		}
+	}
 	pptr->pwaitret = OK;
 	resched();
 	restore(ps);
