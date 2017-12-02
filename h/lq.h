@@ -31,7 +31,7 @@ extern	int	nextlqueue;
 
 /* ANSI compliant function prototypes */
 
-int lenqueue(int item, int tail);
+int lenqueue(int item, int type, int priority, int head);
 int ldequeue(int item);
 int newlqueue();
 int getfirstl(int head);

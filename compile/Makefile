@@ -427,6 +427,28 @@ kprintf.o: ../sys/kprintf.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
 kputc.o: ../sys/kputc.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+lcreate.o: ../sys/lcreate.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+ldelete.o: ../sys/ldelete.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h 
+linit.o: ../sys/linit.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h  ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+lwait.o: ../sys/lwait.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+newlqueue.o: ../sys/newlqueue.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+releaseall.o: ../sys/releaseall.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+lock.o: ../sys/lock.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h 
+ 
 main.o: ../sys/main.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/stdio.h
 mark.o: ../sys/mark.c /usr/include/stdc-predef.h ../h/conf.h \

@@ -3,7 +3,7 @@
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
-#include <q.h>
+#include <lq.h>
 #include <lock.h>
 #include <stdio.h>
 
@@ -61,7 +61,7 @@ int release(int lock, int pid)
 	if(lptr->lhead == NULL)
 	{
 		lptr->lstate = LFREE; //DEqueue nextproc //Update lockid to -1
-		int nextproc = lq[lptr->lhead].lqnext;
+		int nextproc = lq[lptr->lqhead].lqnext;
 		int nexttype = lq[nextproc].lqtype;
 		ldequeue(nextproc);
 		acqlock(nextproc,lock,nexttype);

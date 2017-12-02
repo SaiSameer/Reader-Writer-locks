@@ -1,4 +1,5 @@
 /* proc.h - isbadpid */
+#include <lock.h>
 
 #ifndef _PROC_H_
 #define _PROC_H_

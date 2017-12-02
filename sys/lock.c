@@ -170,7 +170,7 @@ int updatelprio(llist* lhead)
 	int priority = -1;
 	while(list != NULL)
 	{
-		int pprio = ppriority[list->item];
+		int pprio = ppriority(list->item);
 		priority = pprio > priority ? pprio : priority;
 		list = list->lnext;
 	}
@@ -186,7 +186,7 @@ void updatepinhl(llist* lhead, int priority)
 	llist *list = lhead;
 	while(list != NULL)
 	{
-		int pprio = ppriority[list->item];
+		int pprio = ppriority(list->item);
 		if(priority > pprio)
 		{
 			proctab[list->item].pinh = priority;
@@ -244,7 +244,7 @@ void updatepinh(llist* lhead, int priority)
 	llist *list = lhead;
 	while(list != NULL)
 	{
-		int pprio = ppriority[list->item];
+		int pprio = ppriority(list->item);
 		if(priority > pprio)
 		{
 			proctab[list->item].pinh = priority;

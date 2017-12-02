@@ -16,7 +16,11 @@
 #define	LUSED	'\02'		/* this lock is used		*/
 #define READ	0			/* Acquired by a reader*/
 #define WRITE	1			/* Acquired by a writer*/
-#define DELETED	2			/* Deleted*/
+
+typedef struct llist {
+	struct llist *lnext;
+	int item;
+}llist;
 
 struct	lentry	{		/* Lock table entry		*/
 	char	lstate;		/* the state LFREE or LUSED		*/
@@ -28,10 +32,6 @@ struct	lentry	{		/* Lock table entry		*/
 	int lprio;
 };
 
-typedef struct llist {
-	struct llist *lnext;
-	int item;
-}llist;
 extern	struct	lentry	locktab[];
 extern	int	nextlock;
 
