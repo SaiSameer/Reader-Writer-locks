@@ -3,7 +3,7 @@
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
-#include <q.h>
+#include <lq.h>
 #include <lock.h>
 #include <stdio.h>
 
@@ -102,8 +102,11 @@ llist* removelist(int item, llist* lhead)
 		if(q->item == item)
 		{
 			p->lnext = q->lnext;
+			freemem(q,sizeof(llist));
 			break;
 		}
+		p=q;
+		q = q->lnext;
 	}
 
 	return lhead;
@@ -175,10 +178,10 @@ int updatelprio(llist* lhead)
 }
 
 /*------------------------------------------------------------------------
- * updatepinh  --  Update pinh of the holding processes
+ * updatepinhl  --  Update pinh and lockid of the holding processes
  *------------------------------------------------------------------------
  */
-void updatepinh(llist* lhead, int priority)
+void updatepinhl(llist* lhead, int priority)
 {
 	llist *list = lhead;
 	while(list != NULL)
@@ -192,3 +195,61 @@ void updatepinh(llist* lhead, int priority)
 		list = list->lnext;
 	}
 }
+
+/*------------------------------------------------------------------------
+ * removeprocess  --  Remove process from all locks' holding lists
+ *------------------------------------------------------------------------
+ */
+void removeprocess(llist* lhead, int pid)
+{
+	llist *list = lhead;
+	while(list != NULL)
+	{
+		llist *p = locktab[list->item].lhead;
+		if(p != NULL){
+			if(p->item != pid)
+			{
+				llist *q = p->lnext;
+				while(q != NULL)
+				{
+					if(q->item == pid)
+					{
+						p->lnext = q->lnext;
+						freemem(q,sizeof(llist));
+						break;
+					}
+					p = q;
+					q = q->lnext;
+				}
+			}
+			else{
+				locktab[list->item].lhead = p->lnext;
+				if(p->lnext == NULL){
+					locktab[list->item].lstate = LFREE;
+				}
+				freemem(p,sizeof(llist));
+			}
+		}
+		list = list->lnext;
+	}
+}
+
+
+/*------------------------------------------------------------------------
+ * updatepinh  --  Update pinh of the holding processes
+ *------------------------------------------------------------------------
+ */
+void updatepinh(llist* lhead, int priority)
+{
+	llist *list = lhead;
+	while(list != NULL)
+	{
+		int pprio = ppriority[list->item];
+		if(priority > pprio)
+		{
+			proctab[list->item].pinh = priority;
+ 		}
+		list = list->lnext;
+	}
+}
+

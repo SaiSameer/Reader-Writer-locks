@@ -8,6 +8,8 @@
 #include <io.h>
 #include <q.h>
 #include <stdio.h>
+#include <lq.h>
+#include <lock.h>
 
 /*------------------------------------------------------------------------
  * kill  --  kill a process and remove it from the system
@@ -56,6 +58,20 @@ SYSCALL kill(int pid)
 						/* fall through	*/
 	default:	pptr->pstate = PRFREE;
 	}
+
+	removeprocess(pptr->lhead,pid);
+	if(pptr->lockid != -1)
+	{
+		pptr->lockid = -1;
+		ldequeue(pid);
+		struct lentry *lptr;
+		lptr = &locktab[pptr->lockid];
+		if(lptr->lprio <= ppriority(pid)){
+			lptr->lprio = updatelprio(lptr->lhead);
+			updatepinh(lptr->lhead,lptr->lprio);
+		}
+	}
+
 	restore(ps);
 	return(OK);
 }

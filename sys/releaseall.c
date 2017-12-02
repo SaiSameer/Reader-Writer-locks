@@ -63,14 +63,18 @@ int release(int lock, int pid)
 		lptr->lstate = LFREE; //DEqueue nextproc //Update lockid to -1
 		int nextproc = lq[lptr->lhead].lqnext;
 		int nexttype = lq[nextproc].lqtype;
+		ldequeue(nextproc);
 		acqlock(nextproc,lock,nexttype);
+		proctab[nextproc].lockid = EMPTY;
 		ready(nextproc, RESCHYES);
 		if(nexttype == READ){
 			while(nexttype == READ){
 				nextproc = lq[nextproc].lqnext;
 				nexttype = lq[nextproc].lqtype;
 				if(nexttype == READ){
+					ldequeue(nextproc);
 					acqlock(nextproc,lock,nexttype);
+					proctab[nextproc].lockid = EMPTY;
 					ready(nextproc, RESCHYES);
 				}
 			}
@@ -81,7 +85,7 @@ int release(int lock, int pid)
 	lptr->lprio = updatelprio(lptr->lhead);
 
 	//Update pinh and lockid of the holding processes
-	updatepinh(lptr->lhead, lptr->lprio);
+	updatepinhl(lptr->lhead, lptr->lprio);
 
 	return OK;
 }
