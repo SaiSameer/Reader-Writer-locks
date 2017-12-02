@@ -14,6 +14,8 @@
 #include <q.h>
 #include <io.h>
 #include <stdio.h>
+#include <lq.h>
+#include <lock.h>
 
 /*#define DETAIL */
 #define HOLESIZE	(600)	
@@ -36,6 +38,7 @@ struct	lentry	locktab[NLOCKS];	/* lock table			*/
 int	nextsem;		/* next sempahore slot to use in screate*/
 int nextlock;
 struct	qent	q[NQENT];	/* q table (see queue.c)		*/
+struct lqent	lq[NLQENT];
 int	nextqueue;		/* next slot in q structure to use	*/
 int nextlqueue;
 int nextlist;

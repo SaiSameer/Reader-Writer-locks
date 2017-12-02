@@ -110,8 +110,8 @@ void test2 ()
 
         kprintf("-start reader B, D, E. reader B is granted lock.\n");
         resume (rd2);
-	resume (rd3);
-	resume (rd4);
+		resume (rd3);
+		resume (rd4);
 
 
         sleep (15);

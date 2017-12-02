@@ -3,6 +3,7 @@
 #include <conf.h>
 #include <kernel.h>
 #include <lq.h>
+#include <lock.h>
 
 /*------------------------------------------------------------------------
  * enqueue  --	insert an item at the tail of a list
@@ -20,9 +21,16 @@ int lenqueue(int item, int type, int priority, int head)
 	hptr = &lq[lq[head].lqnext];
 	mptr = &lq[item];
 	mptr->lqtype = type;
-	while(hptr->lqnext != EMPTY)
+	while(hptr != EMPTY)
 	{
-		if(hptr->lqkey >=priority){
+		if(hptr->lqkey >priority){
+			hptr = hptr->lqnext;
+		}
+		else if(hptr->lqkey == priority){
+			int ltype = hptr->lqtype;
+			if(ltype == READ){
+				break;
+			}
 			hptr = hptr->lqnext;
 		}
 		else{
@@ -30,10 +38,10 @@ int lenqueue(int item, int type, int priority, int head)
 		}
 	}
 	//mptr->lqprev = lq[hptr->lqnext].lqprev;
-	mptr->lqprev = hptr->lqkey;
-	mptr->lqnext = hptr->lqnext;
-	lq[hptr->lqnext].lqprev = item;
-	hptr->lqnext = item;
+	mptr->lqprev = hptr->lqprev;
+	mptr->lqnext = lq[hptr->lqprev].lqnext;
+	lq[hptr->lqprev].lqnext = item;
+	hptr->lqprev = item;
 	return(item);
 }
 
