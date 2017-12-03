@@ -93,7 +93,7 @@ llist* release(int lock, int pid)
 			//ready(nextproc, RESCHYES);
 			if(nexttype == READ){
 				kprintf("Read process acquired lcok \n");
-				while(nexttype == READ && nextproc != lptr->lqtail){
+				while(nexttype == READ && lq[nextproc].lqnext != lptr->lqtail){
 					nextproc = lq[nextproc].lqnext;
 					nexttype = lq[nextproc].lqtype;
 					if(nexttype == READ){
@@ -109,8 +109,14 @@ llist* release(int lock, int pid)
 	}
 
 	kprintf("New processes aquired lock\n");
+	struct lqent *ptr = &lq[lptr->lqhead];
+	while(ptr->lqnext != EMPTY)
+	{
+		kprintf("The value in lq is %d\n",ptr->lqnext);
+		ptr = &lq[ptr->lqnext];
+	}
 	//Update lprio of the lock
-	lptr->lprio = updatelprio(lptr->lhead);
+	lptr->lprio = updatelprio(lptr->lqhead);
 
 	kprintf("Updated lprio\n");
 	//Update pinh of the holding processes

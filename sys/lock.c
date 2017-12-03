@@ -169,7 +169,7 @@ int getmaxprio(llist* lhead)
 /*------------------------------------------------------------------------
  * updatelprio  --  Update lprio of the lock
  *------------------------------------------------------------------------
- */
+
 int updatelprio(llist* lhead)
 {
 	llist *list = lhead;
@@ -181,7 +181,7 @@ int updatelprio(llist* lhead)
 		list = list->lnext;
 	}
 	return priority;
-}
+}*/
 
 /*------------------------------------------------------------------------
  * updatepinhl  --  Update pinh and lockid of the holding processes
@@ -278,15 +278,21 @@ void updatepinh(llist* lhead, int priority)
  */
 void chprioupdates(int pid)
 {
+	kprintf("Chprio to pid %d\n",pid);
 	struct pentry *pptr;
 	pptr =&proctab[pid];
 	if(pptr->lockid != -1)
 	{
 		//Update lprio of the waiting lock
-		locktab[pptr->lockid].lprio = updatelprio(locktab[pptr->lockid].lhead);
+		int lprio = locktab[pptr->lockid].lprio;
+		kprintf("THe lprio prior is %d\n", lprio);
+		locktab[pptr->lockid].lprio = updatelprio(locktab[pptr->lockid].lqhead);
+		kprintf("THe lprio after is %d\n", locktab[pptr->lockid].lprio);
 
-		//Update pinh of all dependent processes
-		updatepinh(locktab[pptr->lockid].lhead,pptr->lockid);
+		if(locktab[pptr->lockid].lprio != lprio || locktab[pptr->lockid].lprio==0){
+			//Update pinh of all dependent processes
+			updatepinh(locktab[pptr->lockid].lhead,pptr->lockid);
+		}
 	}
 }
 
@@ -302,6 +308,7 @@ void updatepinh(llist * lhead, int priority)
 		struct pentry *pptr = &proctab[p->item];
 		int maxlprio = getmaxprio(pptr->lhead);
 		pptr->pinh = pptr->pprio > maxlprio ? 0 : maxlprio;
+		kprintf("updated priority of pid %d is %d\n",p->item,ppriority(p->item));
 		chprioupdates(p->item);
 		p = p->lnext;
 	}

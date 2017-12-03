@@ -36,5 +36,7 @@ int ldequeue(int item);
 int newlqueue();
 int getfirstl(int head);
 int getlastl(int tail);
+void updatewpinh( int lqhead, int priority);
+int updatelprio(int lqhead);
 
 #endif

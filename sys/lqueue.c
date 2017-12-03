@@ -2,6 +2,7 @@
 
 #include <conf.h>
 #include <kernel.h>
+#include <proc.h>
 #include <lq.h>
 #include <lock.h>
 
@@ -90,4 +91,47 @@ int getlastl(int tail)
 		return( ldequeue(proc) );
 	else
 		return(EMPTY);
+}
+
+
+/*------------------------------------------------------------------------
+ * updatewpinh  --  Update pinhs of the waiting processes
+ *------------------------------------------------------------------------
+ */
+void updatewpinh( int lock, int priority)
+{
+	struct lqent *ptr;
+	ptr = &lq[locktab[lock].lqhead];
+	kprintf("head is %d and tail is %d\n", locktab[lock].lqhead, locktab[lock].lqtail);
+	while(ptr->lqnext != locktab[lock].lqtail)
+	{
+		struct pentry *pptr = &proctab[ptr->lqnext];
+		int maxlprio = getmaxprio(pptr->lhead);
+		pptr->pinh = pptr->pprio > maxlprio ? 0 : maxlprio;
+		//kprintf("updated priority of pid %d is %d\n",ptr->lqnext,ppriority(ptr->lqnext));
+		chprioupdates(ptr->lqnext);
+		ptr = &lq[ptr->lqnext];
+	}
+}
+
+/*------------------------------------------------------------------------
+ * updatelprio  --  Update lprio of the lock
+ *------------------------------------------------------------------------
+ */
+int updatelprio(int lqhead)
+{
+	int priority = -1;
+	struct lqent *ptr;
+	ptr = &lq[lqhead];
+	kprintf("lqnext is %d \n", ptr->lqnext);
+	while(ptr->lqnext != EMPTY)
+	{
+		int pprio = ppriority(ptr->lqnext);
+		if(pprio > priority)
+		{
+			priority = pprio;
+		}
+		ptr = &lq[ptr->lqnext];
+	}
+	return priority;
 }

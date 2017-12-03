@@ -76,6 +76,16 @@ SYSCALL kill(int pid)
 	if(pptr->lockid != -1)
 	{
 		ldequeue(pid);
+		locktab[pptr->lockid].lprio =0;
+		//updatepinh(locktab[pptr->lockid].lqhead,0);
+		struct lqent *ptr = &lq[locktab[pptr->lockid].lqhead];
+		while(ptr->lqnext != EMPTY)
+		{
+			kprintf("The value in lq is %d\n",ptr->lqnext);
+			ptr = &lq[ptr->lqnext];
+		}
+		kprintf("The lqhead is %d and lqtail is %d\n",locktab[pptr->lockid].lqhead,locktab[pptr->lockid].lqtail);
+		updatewpinh(pptr->lockid,0);
 		chprioupdates(pid);
 	}
 	while(readyprocs != NULL)
