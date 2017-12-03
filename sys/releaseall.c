@@ -8,8 +8,6 @@
 #include <stdio.h>
 
 
-LOCAL llist* lrelease(int lock, int pid);
-
 /*------------------------------------------------------------------------
  * releaseall  --  Release multiple locks at once
  *------------------------------------------------------------------------
@@ -25,7 +23,7 @@ SYSCALL releaseall(int numlocks, long locks, ...)
 		int i=0;
 		lock = (int)*((&locks) + i);
 		kprintf("The lock being released is %d\n",lock);
-		rprocs = lrelease(lock,currpid);
+		rprocs = release(lock,currpid);
 		i++;
 	}
 	while(rprocs != NULL){
@@ -41,7 +39,7 @@ SYSCALL releaseall(int numlocks, long locks, ...)
  * release  --  Release lock
  *------------------------------------------------------------------------
  */
-LOCAL llist* lrelease(int lock, int pid)
+llist* release(int lock, int pid)
 {
 	struct lentry *lptr;
 	struct pentry *pptr;
@@ -115,8 +113,12 @@ LOCAL llist* lrelease(int lock, int pid)
 	lptr->lprio = updatelprio(lptr->lhead);
 
 	kprintf("Updated lprio\n");
-	//Update pinh and lockid of the holding processes
-	updatepinhl(lptr->lhead, lptr->lprio);
+	//Update pinh of the holding processes
+	updatepinh(lptr->lhead, lptr->lprio);
+
+	//Remember the process once acquired the lock
+	lptr->remprocs = addlist(lptr->remprocs,pid);
+
 	kprintf("updated pinh and lockid\n");
 	return readyprocs;
 }

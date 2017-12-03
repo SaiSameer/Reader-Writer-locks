@@ -20,7 +20,7 @@ SYSCALL resume(int pid)
 		restore(ps);
 		return(SYSERR);
 	}
-	prio = pptr->pprio;
+	prio = ppriority(pid);
 	ready(pid, RESCHYES);
 	restore(ps);
 	return(prio);

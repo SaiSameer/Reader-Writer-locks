@@ -24,12 +24,33 @@ SYSCALL ldelete(int lock)
 	}
 	lptr = &locktab[lock];
 	lptr->lstate = LFREE;
+	lptr->lprio =0;
+	updatepinh(lptr->lhead,lptr->lprio);
+	llist * list = lptr->lhead;
+	while(list != NULL)
+	{
+		//proctab[list->item].pwaitret = DELETED;
+		pid = list->item;
+		proctab[pid].dlhead = addlist(lock,proctab[pid].dlhead);
+		llist * freenode = list;
+		list = list->lnext;
+		freemem(freenode,sizeof(llist));
+	}
+	list = lptr->remprocs;
+	while(list != NULL)
+	{
+		pid = list->item;
+		proctab[pid].dlhead = addlist(lock,proctab[pid].dlhead);
+		llist * freenode = list;
+		list = list->lnext;
+		freemem(freenode,sizeof(llist));
+	}
 	if (nonemptylq(lptr->lqhead)) {
 		while( (pid=getfirstl(lptr->lqhead)) != EMPTY)
 		  {
-		    proctab[pid].pwaitret = DELETED;
-		    proctab[pid].dlhead = addlist(lock, proctab[pid].dlhead);
-		    ready(pid,RESCHNO);
+			proctab[pid].pwaitret = DELETED;
+			proctab[pid].dlhead = addlist(lock, proctab[pid].dlhead);
+			ready(pid,RESCHNO);
 		  }
 		resched();
 	}

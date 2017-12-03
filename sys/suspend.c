@@ -30,7 +30,7 @@ SYSCALL	suspend(int pid)
 		pptr->pstate = PRSUSP;
 		resched();
 	}
-	prio = pptr->pprio;
+	prio = ppriority(pid);
 	restore(ps);
 	return(prio);
 }

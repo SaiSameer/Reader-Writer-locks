@@ -29,6 +29,7 @@ struct	lentry	{		/* Lock table entry		*/
 	int	lqhead;		/* lq index of head of list		*/
 	int	lqtail;		/* lq index of tail of list		*/
 	llist * lhead;
+	llist * remprocs;
 	int lprio;
 };
 
@@ -37,8 +38,10 @@ extern	int	nextlock;
 
 #define	isbadlock(l)	(l<0 || l>=NLOCKS)
 
-int acqlock(int pid, int lock, int type);
 llist* addlist(int item, llist* lhead);
+llist* removelist( llist* lhead,int item);
+llist* release(int lock, int pid);
+int acqlock(int pid, int lock, int type);
 int ppriority(int pid);
 
 #endif /* LOCK_H_ */

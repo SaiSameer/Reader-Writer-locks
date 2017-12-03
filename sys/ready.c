@@ -17,7 +17,7 @@ int ready(int pid, int resch)
 		return(SYSERR);
 	pptr = &proctab[pid];
 	pptr->pstate = PRREADY;
-	insert(pid,rdyhead,pptr->pprio); //TODO add for lqueue
+	insert(pid,rdyhead,ppriority(pid)); //TODO add for lqueue
 	if (resch)
 		resched();
 	return(OK);

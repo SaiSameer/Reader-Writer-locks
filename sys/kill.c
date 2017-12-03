@@ -59,8 +59,31 @@ SYSCALL kill(int pid)
 	default:	pptr->pstate = PRFREE;
 	}
 
-	kprintf("THe proces being killed is %d",pid);
-	removeprocess(pptr->lhead,pid);
+	kprintf("THe proces being killed is %d\n",pid);
+
+	llist *pllist = pptr->lhead;
+	llist *readyprocs = NULL;
+	while(pllist != NULL)
+	{
+		llist *rprocs = release(pllist->item,pid);
+		locktab[pllist->item].remprocs = removelist(locktab[pllist->item].remprocs, pid);
+		while(rprocs != NULL){
+			//ready(rprocs->item,RESCHYES);
+			readyprocs = addlist(readyprocs,rprocs->item);
+			rprocs = removelist(rprocs,rprocs->item);
+		}
+	}
+	if(pptr->lockid != -1)
+	{
+		ldequeue(pid);
+		chprioupdates(pid);
+	}
+	while(readyprocs != NULL)
+	{
+		ready(readyprocs->item,RESCHYES);
+		readyprocs = removelist(readyprocs,readyprocs->item);
+	}
+	/*removeprocess(pptr->lhead,pid);
 	if(pptr->lockid != -1)
 	{
 		pptr->lockid = -1;
@@ -71,7 +94,7 @@ SYSCALL kill(int pid)
 			lptr->lprio = updatelprio(lptr->lhead);
 			updatepinh(lptr->lhead,lptr->lprio);
 		}
-	}
+	}*/
 
 	restore(ps);
 	return(OK);

@@ -29,7 +29,7 @@ int lenqueue(int item, int type, int priority, int head)
 		}
 		else if(hptr->lqkey == priority){
 			int ltype = hptr->lqtype;
-			if(ltype == WRITE){
+			if(ltype == READ){
 				break;
 			}
 			hptr = &lq[hptr->lqnext];

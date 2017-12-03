@@ -39,7 +39,7 @@ SYSCALL lock(int ldesc1, int type, int priority)
 		{
 			int nextproc = lq[locktab[ldesc1].lqhead].lqnext;
 			kprintf("The highest wait priority is %d with head at %d\n",lq[nextproc].lqkey, locktab[ldesc1].lqhead);
-			if(lq[nextproc].lqkey < priority)
+			if(lq[nextproc].lqkey <= priority)
 			{
 				acqlock(currpid,ldesc1,type);
 				restore(ps);
@@ -73,6 +73,8 @@ int acqlock(int pid, int lock, int type)
 
 	if(ppriority(pid) < lptr->lprio)
 		pptr->pinh = lptr->lprio;
+
+	lptr->remprocs = removelist(lptr->remprocs,pid);
 	return OK;
 }
 
@@ -242,7 +244,7 @@ void removeprocess(llist* lhead, int pid)
 /*------------------------------------------------------------------------
  * updatepinh  --  Update pinh of the holding processes
  *------------------------------------------------------------------------
- */
+
 void updatepinh(llist* lhead, int priority)
 {
 	llist *list = lhead;
@@ -267,6 +269,41 @@ void updatepinh(llist* lhead, int priority)
 			}
  		}
 		list = list->lnext;
+	}
+}*/
+
+/*------------------------------------------------------------------------
+ * chprioupdates  --  Update pinhs due to chprio
+ *------------------------------------------------------------------------
+ */
+void chprioupdates(int pid)
+{
+	struct pentry *pptr;
+	pptr =&proctab[pid];
+	if(pptr->lockid != -1)
+	{
+		//Update lprio of the waiting lock
+		locktab[pptr->lockid].lprio = updatelprio(locktab[pptr->lockid].lhead);
+
+		//Update pinh of all dependent processes
+		updatepinh(locktab[pptr->lockid].lhead,pptr->lockid);
+	}
+}
+
+/*------------------------------------------------------------------------
+ * updatepinh  --  Update pinhs for the given lprio
+ *------------------------------------------------------------------------
+ */
+void updatepinh(llist * lhead, int priority)
+{
+	llist *p = lhead;
+	while(p != NULL)
+	{
+		struct pentry *pptr = &proctab[p->item];
+		int maxlprio = getmaxprio(pptr->lhead);
+		pptr->pinh = pptr->pprio > maxlprio ? 0 : maxlprio;
+		chprioupdates(p->item);
+		p = p->lnext;
 	}
 }
 

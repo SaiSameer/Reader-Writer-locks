@@ -5,6 +5,7 @@
 #include <proc.h>
 #include <q.h>
 #include <stdio.h>
+#include <lock.h>
 
 /*------------------------------------------------------------------------
  * chprio  --  change the scheduling priority of a process
@@ -24,15 +25,9 @@ SYSCALL chprio(int pid, int newprio)
 	pptr->pprio = newprio;
 	if(pptr->pinh != 0)
 	{
-		pptr->pinh = pptr->pinh > pptr->pprio ? pptr->pinh : pptr->pprio;
+		pptr->pinh = pptr->pinh > pptr->pprio ? pptr->pinh : 0;
 	}
-	if(pptr->lockid != -1)
-	{
-		struct lentry *lptr;
-		lptr = &locktab[pptr->lockid];
-		lptr->lprio = updatelprio(lptr->lhead);
-		updatepinh(lptr->lhead,lptr->lprio);
-	}
+	chprioupdates(pid);
 
 	restore(ps);
 	return(newprio);
