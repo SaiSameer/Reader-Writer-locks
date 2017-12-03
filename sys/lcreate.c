@@ -41,7 +41,7 @@ LOCAL int newlock()
 		if (nextlock < 0)
 			nextlock = NLOCKS-1;
 		if (locktab[lock].lstate==LFREE) {
-			//locktab[lock].lstate = LUSED;
+			locktab[lock].lstate = LUSED;
 			return(lock);
 		}
 	}

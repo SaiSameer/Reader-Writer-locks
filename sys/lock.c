@@ -22,12 +22,18 @@ SYSCALL lock(int ldesc1, int type, int priority)
 	if (isbadlock(ldesc1)) {
 		return(SYSERR);
 	}
-	if(checkdllist(lock,currpid) == SYSERR)
+	llist *list = proctab[currpid].dlhead;
+	while(list != NULL)
+	{
+		kprintf("Item in dllist is %d\n",list->item);
+		list = list->lnext;
+	}
+	if(checkdllist(ldesc1,currpid) == SYSERR)
 	{
 		restore(ps);
 		return SYSERR;
 	}
-	if(locktab[ldesc1].lstate == LFREE)
+	if(locktab[ldesc1].lstate == LUSED && locktab[ldesc1].lhead== NULL)
 	{
 		acqlock(currpid,ldesc1, type);
 		restore(ps);
@@ -39,7 +45,7 @@ SYSCALL lock(int ldesc1, int type, int priority)
 		{
 			int nextproc = lq[locktab[ldesc1].lqhead].lqnext;
 			kprintf("The highest wait priority is %d with head at %d\n",lq[nextproc].lqkey, locktab[ldesc1].lqhead);
-			if(lq[nextproc].lqkey <= priority)
+			if(lq[nextproc].lqkey <= priority )
 			{
 				acqlock(currpid,ldesc1,type);
 				restore(ps);
@@ -127,6 +133,7 @@ int checkdllist(int lock, int pid)
 	struct pentry *pptr;
 	pptr = &proctab[pid];
 	llist * list = pptr->dlhead;
+	kprintf("Current pid is %d and lock in dllist is %d\n", pid, lock);
 	while(list != NULL)
 	{
 		if(list->item == lock)
@@ -183,10 +190,11 @@ int updatelprio(llist* lhead)
 	return priority;
 }*/
 
-/*------------------------------------------------------------------------
+/*
+------------------------------------------------------------------------
  * updatepinhl  --  Update pinh and lockid of the holding processes
  *------------------------------------------------------------------------
- */
+
 void updatepinhl(llist* lhead, int priority)
 {
 	llist *list = lhead;
@@ -201,11 +209,13 @@ void updatepinhl(llist* lhead, int priority)
 		list = list->lnext;
 	}
 }
+*/
 
-/*------------------------------------------------------------------------
+/*
+------------------------------------------------------------------------
  * removeprocess  --  Remove process from all locks' holding lists
  *------------------------------------------------------------------------
- */
+
 void removeprocess(llist* lhead, int pid)
 {
 	llist *list = lhead;
@@ -239,6 +249,7 @@ void removeprocess(llist* lhead, int pid)
 		list = list->lnext;
 	}
 }
+*/
 
 
 /*------------------------------------------------------------------------
@@ -312,5 +323,43 @@ void updatepinh(llist * lhead, int priority)
 		chprioupdates(p->item);
 		p = p->lnext;
 	}
+}
+
+/*------------------------------------------------------------------------
+ * getnextproc  --  Get next process in wait queue with req type
+ *------------------------------------------------------------------------
+ */
+int getnextproc(int pid, int type)
+{
+	int nextproc = pid;
+	while(lq[nextproc].lqkey == lq[lq[nextproc].lqnext].lqkey){
+		int nextp = lq[nextproc].lqnext;
+		kprintf("nexproc is %d and nextp is %d\n", nextproc, nextp);
+		if(lq[nextproc].ltime - lq[nextp].ltime < 1000)
+		{
+			if(lq[nextp].lqtype == type){
+				pid = nextp;
+				break;
+			}
+		}
+		nextproc = nextp;
+	}
+	kprintf("pid returned is %d\n", pid);
+	return pid;
+}
+
+/*------------------------------------------------------------------------
+ * searchlock  --  Search if a lock is being held by a process
+ *------------------------------------------------------------------------
+ */
+int searchlock(int lock, int pid)
+{
+	llist * list = proctab[pid].lhead;
+	while(list != NULL){
+		if(list->item == lock){
+			return OK;
+		}
+	}
+	return SYSERR;
 }
 

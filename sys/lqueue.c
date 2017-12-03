@@ -25,16 +25,16 @@ int lenqueue(int item, int type, int priority, int head)
 	mptr->lqkey = priority;
 	while(hptr->lqnext != EMPTY)
 	{
-		if(hptr->lqkey >priority){
+		if(hptr->lqkey >=priority){
 			hptr = &lq[hptr->lqnext];
 		}
-		else if(hptr->lqkey == priority){
+		/*else if(hptr->lqkey == priority){
 			int ltype = hptr->lqtype;
 			if(ltype == READ){
 				break;
 			}
 			hptr = &lq[hptr->lqnext];
-		}
+		}*/
 		else{
 			break;
 		}
@@ -44,6 +44,7 @@ int lenqueue(int item, int type, int priority, int head)
 	mptr->lqnext = lq[hptr->lqprev].lqnext;
 	lq[hptr->lqprev].lqnext = item;
 	hptr->lqprev = item;
+	mptr->ltime = ctr1000;
 	//kprintf("%d\t%d\t%d\n",mptr->lqprev,mptr->lqnext, item);
 	return(item);
 }

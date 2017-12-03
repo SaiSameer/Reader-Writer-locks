@@ -35,6 +35,7 @@ struct	lentry	{		/* Lock table entry		*/
 
 extern	struct	lentry	locktab[];
 extern	int	nextlock;
+extern	long ctr1000;
 
 #define	isbadlock(l)	(l<0 || l>=NLOCKS)
 

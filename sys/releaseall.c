@@ -18,12 +18,20 @@ SYSCALL releaseall(int numlocks, long locks, ...)
 	int	lock;
 	disable(ps);
 	llist *rprocs = NULL;
+	int retval = OK;
 	for(; numlocks >0;numlocks--)
 	{
 		int i=0;
 		lock = (int)*((&locks) + i);
 		kprintf("The lock being released is %d\n",lock);
-		rprocs = release(lock,currpid);
+		int status = searchlock(lock,currpid);
+		if(status == OK){
+			rprocs = release(lock,currpid);
+		}
+		else{
+			retval = status;
+		}
+		//rprocs = release(lock,currpid);
 		i++;
 	}
 	while(rprocs != NULL){
@@ -32,7 +40,7 @@ SYSCALL releaseall(int numlocks, long locks, ...)
 	}
 	resched();
 	restore(ps);
-	return OK;
+	return retval;
 }
 
 /*------------------------------------------------------------------------
@@ -76,12 +84,16 @@ llist* release(int lock, int pid)
 	llist *readyprocs = NULL;
 	if(lptr->lhead == NULL)
 	{
-		lptr->lstate = LFREE; //DEqueue nextproc //Update lockid to -1
+		//lptr->lstate = LFREE; //DEqueue nextproc //Update lockid to -1
+		//kprintf("Lock %d is now free\n",lock);
 		int nextproc = lq[lptr->lqhead].lqnext;
 		int dummy = nextproc;
 		while(lq[dummy].lqnext != EMPTY){
 			kprintf("dummhy is %d \n",dummy);
 			dummy = lq[dummy].lqnext;
+		}
+		if(lq[nextproc].lqtype != WRITE){
+			nextproc = getnextproc(nextproc,WRITE);
 		}
 		if(nextproc != lptr->lqtail){
 			int nexttype = lq[nextproc].lqtype;
@@ -103,6 +115,15 @@ llist* release(int lock, int pid)
 						readyprocs = addlist(nextproc,readyprocs);
 						//ready(nextproc, RESCHYES);
 					}
+					else if(nexttype == WRITE)
+					{
+						nextproc = getnextproc(nextproc,READ);
+						nexttype = lq[nextproc].lqtype;
+						ldequeue(nextproc);
+						acqlock(nextproc,lock,nexttype);
+						proctab[nextproc].lockid = EMPTY;
+						readyprocs = addlist(nextproc,readyprocs);
+					}
 				}
 			}
 		}
@@ -123,7 +144,7 @@ llist* release(int lock, int pid)
 	updatepinh(lptr->lhead, lptr->lprio);
 
 	//Remember the process once acquired the lock
-	lptr->remprocs = addlist(lptr->remprocs,pid);
+	lptr->remprocs = addlist(pid,lptr->remprocs);
 
 	kprintf("updated pinh and lockid\n");
 	return readyprocs;

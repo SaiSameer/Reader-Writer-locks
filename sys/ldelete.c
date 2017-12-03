@@ -40,6 +40,7 @@ SYSCALL ldelete(int lock)
 	while(list != NULL)
 	{
 		pid = list->item;
+		kprintf("Notify deletion to pid %d\n",pid);
 		proctab[pid].dlhead = addlist(lock,proctab[pid].dlhead);
 		llist * freenode = list;
 		list = list->lnext;

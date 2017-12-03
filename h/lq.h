@@ -15,6 +15,7 @@ struct	lqent	{		/* one for each process plus two for	*/
 	int	lqnext;		/* pointer to next process or tail	*/
 	int	lqprev;		/* pointer to previous process or head	*/
 	int lqtype;
+	long ltime;
 };
 
 extern	struct	lqent lq[];
