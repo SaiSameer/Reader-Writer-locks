@@ -50,7 +50,8 @@ SYS =	blkcmp.c	blkequ.c	main.c		stacktrace.c	\
 	unsleep.c	userret.c	wait.c		wakeup.c	\
 	write.c		xdone.c		pci.c		shutdown.c	\
 	linit.c		lcreate.c	ldelete.c	lwait.c		\
-	lqueue.c	newlqueue.c	lock.c		releaseall.c 
+	lqueue.c	newlqueue.c	lock.c		task1.c		\
+	releaseall.c 
 
 TTY =	ttyalloc.c	ttycntl.c	ttygetc.c	ttyiin.c	\
 	ttyinit.c	ttynew.c	ttyopen.c	ttyputc.c	\
@@ -449,6 +450,9 @@ lock.o: ../sys/lock.c  /usr/include/stdc-predef.h ../h/conf.h \
  ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h 
 lqueue.o: ../sys/lqueue.c  /usr/include/stdc-predef.h ../h/conf.h \
+ ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
+task1.o: ../sys/task1.c  /usr/include/stdc-predef.h ../h/conf.h \
  ../h/lq.h ../h/lock.h ../h/proc.h ../h/stdio.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
  

@@ -37,6 +37,7 @@ SYSCALL	lwait(int lock, int type, int priority)
 			if(lprio < lptr->lprio)
 			{
 				proctab[list->item].pinh = lptr->lprio;
+				kprintf("Priority of %d is %d\n",list->item, ppriority(list->item));
 			}
 			chprioupdates(list->item);
 			list= list->lnext;

@@ -3,7 +3,6 @@
 #include <proc.h>
 #include <lock.h>
 #include <stdio.h>
-#include <lock.h>
 
 #define DEFAULT_LOCK_PRIO 20
 
@@ -435,7 +434,10 @@ int main() {
 	//test3();
 	//test4();
 	//test4_2();
-	test8();
+	task1();
+	//task1_sem();
+	//task();
+	//test8();
 
 	/* The hook to shutdown QEMU for process-like execution of XINU.
 	 * This API call exists the QEMU process.
