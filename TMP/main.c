@@ -4,7 +4,6 @@
 #include <lock.h>
 #include <stdio.h>
 #include <lock.h>
-#include <lq.h>
 
 #define DEFAULT_LOCK_PRIO 20
 
@@ -76,7 +75,7 @@ void writer2 (char msg, int lck, int lprio)
         lock (lck, WRITE, lprio);
         output2[count2++]=msg;
         kprintf ("  %c: acquired lock, sleep 3s\n", msg);
-        sleep (5);
+        sleep (1);
         output2[count2++]=msg;
         kprintf ("  %c: to release lock\n", msg);
         releaseall (1, lck);
@@ -111,8 +110,9 @@ void test2 ()
 
         kprintf("-start reader B, D, E. reader B is granted lock.\n");
         resume (rd2);
-		resume (rd3);
-		resume (rd4);
+	resume (rd3);
+	resume (rd4);
+
 
         sleep (15);
         kprintf("output=%s\n", output2);
@@ -163,7 +163,6 @@ void test3 ()
         kprintf("-start reader A, then sleep 1s. reader A(prio 25) blocked on the lock\n");
         resume(rd1);
         sleep (1);
-        kprintf("get prio(wr1) %d\n",getprio(wr1));
 	assert (getprio(wr1) == 25, "Test 3 failed");
 
         kprintf("-start reader B, then sleep 1s. reader B(prio 30) blocked on the lock\n");
@@ -174,168 +173,15 @@ void test3 ()
 	kprintf("-kill reader B, then sleep 1s\n");
 	kill (rd2);
 	sleep (1);
-	kprintf("get prio(wr1) %d\n",getprio(wr1));
 	assert (getprio(wr1) == 25, "Test 3 failed");
 
 	kprintf("-kill reader A, then sleep 1s\n");
 	kill (rd1);
 	sleep(1);
-	kprintf("get prio(wr1) %d\n",getprio(wr1));
 	assert(getprio(wr1) == 20, "Test 3 failed");
 
         sleep (8);
         kprintf ("Test 3 OK\n");
-}
-
-/*
-void reader4 (char *msg, int lck)
-{
-	lock (lck, READ, DEFAULT_LOCK_PRIO);
-	kprintf ("  %s: acquired lock, sleep 2s\n", msg);
-	sleep (2);
-	kprintf ("  %s: to release lock\n", msg);
-	releaseall (1, lck);
-	sleep(10);
-	int x=lock (lck, READ, DEFAULT_LOCK_PRIO);
-	kprintf("status %d, expected -1 \n",x);
-}
-void test5 ()
-{
-	int	lck;
-	int	pid1;
-	int	pid2;
-
-	kprintf("\nTest 1: readers can share the rwlock\n");
-	lck  = lcreate ();
-	assert (lck != SYSERR, "Test 1 failed");
-
-	pid1 = create(reader1, 2000, 20, "reader a", 2, "reader a", lck);
-	pid2 = create(reader4, 2000, 20, "reader b", 2, "reader b", lck);
-
-	resume(pid1);
-	resume(pid2);
-
-	sleep (5);
-	ldelete (lck);
-	sleep(10);
-	kprintf ("Test 1 ok\n");
-}
-
-
-//test  second rule
-void test4 ()
-{
-        count2 = 0;
-        int     lck;
-        int     rd1, rd2, rd3;
-        int     wr1,wr2;
-
-        kprintf("\nTest 4	: wait on locks with priority. Expected order of"
-		" lock acquisition is: reader A, reader B, reader D, writer C & reader E\n");
-        lck  = lcreate ();
-        assert (lck != SYSERR, "Test 4 failed");
-
-	rd1 = create(reader2, 2000, 20, "reader2", 3, 'A', lck, 25);
-	rd2 = create(reader2, 2000, 20, "reader2", 3, 'B', lck, 25);
-	rd3 = create(reader2, 2000, 40, "reader2", 3, 'C', lck, 20);
-    wr1 = create(writer2, 2000, 20, "writer2", 3, 'X', lck, 25);
-        //wr2 = create(writer2, 2000, 10, "writer2", 3, 'Y', lck, 25);
-    wr2 = create(writer2, 2000, 20, "writer2", 3, 'Y', lck, 20);
-
-    kprintf("process id %d %d %d %d \n",rd1,rd2,rd3,wr1);
-
-        kprintf("start X A\n");
-        resume(wr1);
-        sleep(1);
-
-        kprintf("Start B\n");
-        resume(rd1);
-        resume(rd2);
-        resume(wr2);
-        resume(rd3);
-
-
-        sleep(30);
-        kprintf("Waiting\n");
-        output2[count2++]=0;
-        kprintf("output=%s\n", output2);
-        assert(mystrncmp(output2,"ABABDDCCEE",10)==0,"Test 4 FAILED\n");
-        kprintf ("Test 4 OK\n");
-}
-*/
-void reader4 (char *msg, int lck)
-{
-	lock (lck, READ, DEFAULT_LOCK_PRIO);
-	kprintf ("  %s: acquired lock, sleep 2s\n", msg);
-	sleep (2);
-	kprintf ("  %s: to release lock\n", msg);
-	releaseall (1, lck);
-	sleep(10);
-	int x=lock (lck, READ, DEFAULT_LOCK_PRIO);
-	kprintf("status %d, expected -1 \n",x);
-}
-void test5 ()
-{
-	int	lck;
-	int	pid1;
-	int	pid2;
-
-	kprintf("\nTest 1: readers can share the rwlock\n");
-	lck  = lcreate ();
-	assert (lck != SYSERR, "Test 1 failed");
-
-	pid1 = create(reader1, 2000, 20, "reader a", 2, "reader a", lck);
-	pid2 = create(reader4, 2000, 20, "reader b", 2, "reader b", lck);
-
-	resume(pid1);
-	resume(pid2);
-
-	sleep (5);
-	ldelete (lck);
-	sleep(10);
-	kprintf ("Test 1 ok\n");
-}
-
-
-//test  second rule
-void test4 ()
-{
-        count2 = 0;
-        int     lck;
-        int     rd1, rd2, rd3;
-        int     wr1,wr2;
-
-        kprintf("\nTest 2: wait on locks with priority. Expected order of"
-		" lock acquisition is: reader A, reader B, reader D, writer C & reader E\n");
-        lck  = lcreate ();
-        assert (lck != SYSERR, "Test 4 failed");
-
-	rd1 = create(reader2, 2000, 20, "reader2", 3, 'A', lck, 25);
-	rd2 = create(reader2, 2000, 20, "reader2", 3, 'B', lck, 25);
-	rd3 = create(reader2, 2000, 20, "reader2", 3, 'C', lck, 20);
-    wr1 = create(writer2, 2000, 20, "writer2", 3, 'X', lck, 25);
-        wr2 = create(writer2, 2000, 20, "writer2", 3, 'Y', lck, 25);
-    //wr2 = create(writer2, 2000, 20, "writer2", 3, 'Y', lck, 20);
-
-    kprintf("process id %d %d %d %d \n",rd1,rd2,rd3,wr1);
-
-        kprintf("start X A\n");
-        resume(wr1);
-        sleep(1);
-
-        kprintf("Start B\n");
-        resume(rd1);
-        resume(rd2);
-        resume(wr2);
-        resume(rd3);
-
-
-        sleep(60);
-        kprintf("Waiting\n");
-        output2[count2++]=0;
-        kprintf("output=%s\n", output2);
-        assert(mystrncmp(output2,"ABABDDCCEE",10)==0,"Test 4 FAILED\n");
-        kprintf ("Test 4 OK\n");
 }
 
 int main( )
@@ -344,11 +190,9 @@ int main( )
          * The provided results do not guarantee your correctness.
          * You need to read the PA2 instruction carefully.
          */
-	//test1();
-	//test2();
-	//test3();
-	test4();
-	test5();
+	test1();
+	test2();
+	test3();
 
         /* The hook to shutdown QEMU for process-like execution of XINU.
          * This API call exists the QEMU process.

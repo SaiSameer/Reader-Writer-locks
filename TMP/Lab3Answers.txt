@@ -1,0 +1,78 @@
+Additional Tasks
+
+1.The priority inversion problem could cause that a higher-priority process needs to wait for the completion of a lower-priority process.
+	1. Priority inheritance is one approach to address this issue. Please give another approach and briefly describe its idea.
+	
+	Ans:Another approaches to solve priority inversion can be listed as follows: Priority ceiling, Random boosting etc. 
+	In priority ceiling, each resource is given a priority equal to the maximum of the priorities of the tasks that can lock the resource. 
+	Then on the event of a priority inverision or deadlock, the priority of the low-priority process holding the resource is boosted to the priority ceiling of the resource.
+	This allows the low priority process to quickly complete its tasks on the resource without interruptions as other tasks that can hold the lock cannnot be scheduled until this process releases it.
+	This change of priority to the low priority process to the ceil can be made in two different ways: OCPP(Original Ceiling Priority Protocol) and ICPP(Immediate Ceiling Priority Protocol). 
+	In OCPP the priority is boosted only when a higher priority process tries to acquire the lock. Whereas in ICPP the priority is boosted immediately as it acquires the resource.
+
+	Reference:
+		(i) https://en.wikipedia.org/wiki/Priority_ceiling_protocol
+	
+	2.Design a test case to show that your approach can address the priority inversion problem. You should compare the results that derived from the original XINU implementation (use semaphore) and that derived from your implementation (use readers/writer locks). Put your results in Lab3Answers.txt and your test case program (name it task1.c) in both ./sys and ./TMP
+	
+	Ans:
+	
+	The output for the test task1 in task1.c is below:
+	
+	Task 1: Test the priority inheritence
+	Readers/writer implementation
+	-start writer A, then sleep 1s. lock granted to A (prio 10)
+	  writer A: to acquire lock 49
+	  writer A: acquired lock 49, sleep 3s
+	-start writer B, then sleep 1s. writer B(prio 30) blocked
+	  writer B: to acquire lock 49
+	-start normal process E(prio 20)
+	  writer A: to release lock 49
+	Process writer A is completed
+	  writer B: acquired lock 49, sleep 3s
+	Executing Medium priority process E
+	  writer B: to release lock 49
+	Process writer B is completed
+	Process process E is completed
+
+	Semaphore implementation
+	-start writer A, then sleep 1s. semaphore granted to A (prio 10)
+	  writer A: to acquire semaphore
+	  writer A: acquired semaphore
+	-start writer B, then sleep 1s. writer B(prio 30) blocked on the semaphore
+	  writer B: to acquire semaphore
+	-start normal process E(prio 20)
+	Executing Medium priority process E
+	Process process E is completed
+	  writer A: to release semaphore
+	Process writer A is completed
+	  writer B: acquired semaphore
+	  writer B: to release semaphore
+	Process writer B is completed
+	Task 1 OK
+	
+	In the above output the upper portion is the test of Readers/writer implementation and the lower portion is original semaphore usage. 
+	We have three process A(priority 10), B(priority 30), and E(priority 10).
+	Readers/writer Implementation:
+	In this test, process A first acquires a lock and goes to sleep. Then Process B which has a higher priority than A now tries to acquire the lock and waits for it. As for our implementation of priority inheritence A's priority is now 30 as well.
+	As B is in wait, process E is scheduled and it also goes to sleep for the first second. Then, as the priority of A is greater than E, A is scheduled and it finishes its task, releases the lock.
+	Then in between B and E, as B has higher priority, B gets scheduled. Then B acquires the lock and goes to sleep. Now E gets scheduled and starts working. 
+	But as B has a higher priority, after its sleep B finishes first and then E. So the order is A,B and E.
+	Semaphore Implementation:
+	In this test, A acquires a semaphore and sleeps. Now B tries to acquire it and waits. Then E gets scheduled and sleeps for the first second.
+	Now, as the priority of E is greater than A's priority it gets scheduled first and finishes its work. Then, A gets scheduled and finishes its work, releases semaphore.
+	Now B finally gets its semaphore and does its task and releases it.
+	
+	As we can see above, when a medium priority process E arrived in a situation when a resource required for a higher priority process B is acquired by a lower priority process A,
+	in case of original semaphore implementation, the medium priority process gets executed first, making the higher priority process wait more due to the lower priority of A.
+	But in case of Readers/writer implementation, as A's priority is increased it gets executed first so that the higher priority B first finishes its task than the medium priority process E.
+
+
+	
+2.Synchronization is a quite complex issue in operating systems. To show your understanding about process synchronization, you are asked to point out a reader/writer synchronization issue in this pesudo-code: task2_sync_issue.c. Multiple reader threads can execute this code concurrently by calling do_update. All the variables starting with global_ are global variables. You are asked to describe the potential issue caused by the incorrect synchronization and point out at least one possible thread interleaving that would trigger the problem. Put your answer in Lab3Answers.txt mentioned above.
+
+Ans: The psuedo code in the given file shows that in do_update, each reader thread aquires a reader lock and tries to update the global buffer with current time. 
+As it is a reader lock, multiple readers can acquire the lock and make changes to the global buffer simulltaneously. 
+Although a global semophore is acquired and locked before updating the global buffer, as the global semophore is initialized to 10, 10 processes can simultaneously acquire it.
+Then if one of the process preempts or context switching occurs of other cause they can concurrently modify it corrupting the information in the buffer.
+Inorder to rectify this the lock to make updates to the buffer should be exclusive that is a writer lock must be obtained to make changes.
