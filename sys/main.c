@@ -22,19 +22,8 @@ int mystrncmp(char* des, char* target, int n) {
 	return 0;
 }
 
-void writer7(char msg, int lck, int lprio) {
-	kprintf("  %c: to acquire lock\n", msg);
-	int state=lock(lck, WRITE, lprio);
-	kprintf(" state %d \n ",state);
-}
 
-/*--------------------------------Test 1--------------------------------*/
 
-void reader7(char *msg, int lck) {
-	lock(lck, READ, DEFAULT_LOCK_PRIO);
-	kprintf("  %s: acquired lock, sleep 2s\n", msg);
-	sleep(10);
-}
 void reader1(char *msg, int lck) {
 	lock(lck, READ, DEFAULT_LOCK_PRIO);
 	kprintf("  %s: acquired lock, sleep 2s\n", msg);
@@ -103,28 +92,70 @@ void test1() {
 	kprintf("Test 1 ok\n");
 }
 
-void test7() {
-	int lck;
+
+
+void writer7(char msg, int lck, int lprio) {
+	kprintf("  %c: to acquire lock %d \n", msg,lck);
+	lock(lck, WRITE, lprio);
+	kprintf("%c acquired lock %d sleep 10\n",msg,lck);
+	sleep(10);
+	releaseall(1,lck);
+}
+
+/*--------------------------------Test 1--------------------------------*/
+
+void reader7(char msg, int lck,int lck2) {
+	kprintf("  %c: trying to acquire lock1 %d \n", msg,lck);
+	lock(lck, READ, DEFAULT_LOCK_PRIO);
+	kprintf("  %c: acquired lock1 %d, sleep 3s\n", msg,lck);
+	sleep(3);
+	kprintf("  %c: trying to acquire lock2 %d \n", msg,lck2);
+	lock(lck2, WRITE, DEFAULT_LOCK_PRIO);
+	kprintf("  %c: acquired lock2 %d \n", msg, lck2);
+	releaseall(2,lck,lck2);
+}
+
+
+
+void test8() {
+	int lck1,lck2;
 	int pid1;
 	int pid2;
+	int pid3;
 
 	kprintf("\nTest 7: readers can share the rwlock\n");
-	lck = lcreate();
-	assert(lck != SYSERR, "Test 7 failed");
+	lck1 = lcreate();
+	lck2 = lcreate();
+	assert(lck1 != SYSERR, "Test 7 failed");
 
-	pid1 = create(reader7, 2000, 20, "reader a", 2, "reader a", lck);
-	pid2 = create(writer7, 2000, 20, "writer2", 3, 'C', lck, 25);
+	pid1 = create(reader7, 2000, 10, "reader a", 3, 'R', lck1,lck2);
+	pid2 = create(writer7, 2000, 20, "writer2", 3, 'X', lck2, DEFAULT_LOCK_PRIO);
+	pid3 = create(writer7, 2000, 30, "writer2", 3, 'Y', lck1, DEFAULT_LOCK_PRIO);
 
 	resume(pid1);
+	sleep(1);
+
 	resume(pid2);
 
-	sleep(2);
+	sleep(3);
+	resume(pid3);
+	sleep(1);
 
-	ldelete(lck);
+	kprintf("priority of rd1 is %d \n",getprio(pid1));
+	kprintf("priority of rd2 is %d \n",getprio(pid2));
+	kprintf("priority of rd3 is %d \n",getprio(pid3));
 
-	sleep(10);
 
-	kprintf("Test 1 ok\n");
+
+
+	sleep(30);
+
+	ldelete(lck1);
+	ldelete(lck2);
+
+
+
+	kprintf("Test 8 ok\n");
 }
 
 /*----------------------------------Test 2---------------------------*/
@@ -404,7 +435,7 @@ int main() {
 	//test3();
 	//test4();
 	//test4_2();
-	test7();
+	test8();
 
 	/* The hook to shutdown QEMU for process-like execution of XINU.
 	 * This API call exists the QEMU process.

@@ -357,8 +357,10 @@ int searchlock(int lock, int pid)
 	llist * list = proctab[pid].lhead;
 	while(list != NULL){
 		if(list->item == lock){
+			kprintf("The lock %d is held by pid %d\n", lock, pid);
 			return OK;
 		}
+		list = list->lnext;
 	}
 	return SYSERR;
 }

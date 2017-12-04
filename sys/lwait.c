@@ -38,6 +38,7 @@ SYSCALL	lwait(int lock, int type, int priority)
 			{
 				proctab[list->item].pinh = lptr->lprio;
 			}
+			chprioupdates(list->item);
 			list= list->lnext;
 		}
 	}

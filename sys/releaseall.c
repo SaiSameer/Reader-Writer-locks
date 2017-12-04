@@ -19,9 +19,9 @@ SYSCALL releaseall(int numlocks, long locks, ...)
 	disable(ps);
 	llist *rprocs = NULL;
 	int retval = OK;
+	int i=0;
 	for(; numlocks >0;numlocks--)
 	{
-		int i=0;
 		lock = (int)*((&locks) + i);
 		kprintf("The lock being released is %d\n",lock);
 		int status = searchlock(lock,currpid);
